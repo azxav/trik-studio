@@ -35,6 +35,9 @@ public:
 	/// Constructor, takes current robot model as parameter.
 	explicit WaitForEncoderBlock(robotModel::RobotModelInterface &robotModel);
 
+	/// Reports an error if "TachoLimit" property is empty, otherwise starts waiting for the encoder.
+	void run() override;
+
 private Q_SLOTS:
 	/// Called when new data from encoder ready, checks it against "TachoLimit" property.
 	void responseSlot(const QVariant &reading) override;

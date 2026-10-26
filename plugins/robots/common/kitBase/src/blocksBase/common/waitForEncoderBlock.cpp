@@ -29,6 +29,17 @@ WaitForEncoderBlock::WaitForEncoderBlock(RobotModelInterface &robotModel)
 	mActiveWaitingTimer->setInterval(1);
 }
 
+void WaitForEncoderBlock::run()
+{
+	// Empty expression is silently evaluated to 0, so the block would finish immediately instead of waiting.
+	if (stringProperty("TachoLimit").trimmed().isEmpty()) {
+		error(tr("Tacho limit value is not set"));
+		return;
+	}
+
+	WaitForSensorBlock::run();
+}
+
 void WaitForEncoderBlock::responseSlot(const QVariant &reading)
 {
 	const int result = eval<int>("TachoLimit");
