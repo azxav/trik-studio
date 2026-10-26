@@ -83,6 +83,10 @@ public:
 	/// Passes into scene a reference to controller object that will execute commands.
 	void setController(qReal::ControllerInterface &controller);
 
+	/// Executes @a command with the controller and makes sure that worldChangedByCommand() is emitted
+	/// each time when the command is undone or redone. Controller must be set before calling this method.
+	void executeCommand(qReal::commands::AbstractCommand *command);
+
 	/// Forbid all interaction with specified categories of objects on scene, for "challenge" mode where student
 	/// shall provide program that makes robot do specific task in given unmodifyable world model.
 	/// Categories of items include world model (walls, lines, etc.), sensors, robot position.
@@ -154,6 +158,9 @@ Q_SIGNALS:
 
 	/// Emitted each time when user releases mouse button somewhere on the scene.
 	void mouseReleased();
+
+	/// Emitted each time when a command executed with executeCommand() is undone or redone.
+	void worldChangedByCommand();
 
 	/// Emitted each time when user presses mouse button on the robot item.
 	void robotPressed();

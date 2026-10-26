@@ -150,6 +150,14 @@ void TwoDModelScene::setController(ControllerInterface &controller)
 	mController = &controller;
 }
 
+void TwoDModelScene::executeCommand(qReal::commands::AbstractCommand *command)
+{
+	// Undo and redo change the world model, so it must be saved after them, as it is done after user actions.
+	connect(command, &qReal::commands::AbstractCommand::undoComplete, this, &TwoDModelScene::worldChangedByCommand);
+	connect(command, &qReal::commands::AbstractCommand::redoComplete, this, &TwoDModelScene::worldChangedByCommand);
+	mController->execute(command);
+}
+
 bool TwoDModelScene::worldReadOnly() const
 {
 	return mWorldReadOnly;
@@ -726,7 +734,7 @@ void TwoDModelScene::pasteItemsFromClipboard()
 		newItems << newItem;
 	}
 	auto command = new commands::CreateWorldItemsCommand(mModel, newItems);
-	mController->execute(command);
+	executeCommand(command);
 
 	for (auto &&id : newIds) {
 		const auto &item = findItem(id);
@@ -816,7 +824,7 @@ void TwoDModelScene::deleteWithCommand(const QStringList &worldItems,
 			command->addPostAction(additionalCommand);
 		}
 
-		mController->execute(command);
+		executeCommand(command);
 	}
 }
 
@@ -1121,7 +1129,7 @@ void TwoDModelScene::registerInUndoStack(AbstractItem *item)
 			auto *command = new commands::CreateWorldItemCommand(mModel, item->id());
 			// Command was already executed when element was drawn by user. So we should create it in redone state.
 			command->setRedoEnabled(false);
-			mController->execute(command);
+			executeCommand(command);
 			command->setRedoEnabled(true);
 		}
 	}
@@ -1149,7 +1157,7 @@ void TwoDModelScene::subscribeItem(AbstractItem *item)
 			mCurrentReshapeCommand->stopTracking();
 			if (mController) {
 				mCurrentReshapeCommand->setRedoEnabled(false);
-				mController->execute(mCurrentReshapeCommand);
+				executeCommand(mCurrentReshapeCommand);
 				mCurrentReshapeCommand->setRedoEnabled(true);
 			}
 

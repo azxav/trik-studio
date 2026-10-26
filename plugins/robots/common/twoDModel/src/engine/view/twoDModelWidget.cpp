@@ -107,6 +107,7 @@ TwoDModelWidget::TwoDModelWidget(Model &model, QWidget *parent)
 	connect(&*mScene, &TwoDModelScene::mousePressed, this, &TwoDModelWidget::refreshCursor);
 	connect(&*mScene, &TwoDModelScene::mouseReleased, this, &TwoDModelWidget::refreshCursor);
 	connect(&*mScene, &TwoDModelScene::mouseReleased, this, [this]() { saveWorldModelToRepo(); });
+	connect(&*mScene, &TwoDModelScene::worldChangedByCommand, this, [this]() { saveWorldModelToRepo(); });
 	connect(&*mScene, &TwoDModelScene::robotPressed, mUi->palette, &Palette::unselect);
 	connect(&*mScene, &TwoDModelScene::robotListChanged, this, &TwoDModelWidget::onRobotListChange);
 
@@ -819,7 +820,7 @@ void TwoDModelWidget::setController(ControllerInterface &controller)
 
 	auto setItemsProperty = [=](const QStringList &items, const QString &property, const QVariant &value) {
 		if (mController) {
-			mController->execute(new commands::ChangePropertyCommand(*mScene, items, property, value));
+			mScene->executeCommand(new commands::ChangePropertyCommand(*mScene, items, property, value));
 		}
 		saveWorldModelToRepo();
 	};
